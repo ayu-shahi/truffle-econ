@@ -21,21 +21,21 @@ class Paper:
     pages: Optional[str] = None
     doi: Optional[str] = None
 
-# Journal colors for visualization (matching a dark theme aesthetic)
+# Journal colors for visualization (suitable for white background)
 JOURNAL_COLORS = {
-    "American Economic Review": "#FF6B6B",  # Red
-    "Quarterly Journal of Economics": "#4ECDC4",  # Teal
-    "Econometrica": "#45B7D1",  # Blue
-    "Journal of Political Economy": "#96CEB4",  # Green
-    "Review of Economic Studies": "#FFEAA7",  # Yellow
+    "American Economic Review": "#E63946",  # Red
+    "Quarterly Journal of Economics": "#2A9D8F",  # Teal
+    "Econometrica": "#457B9D",  # Blue
+    "Journal of Political Economy": "#6A994E",  # Green
+    "Review of Economic Studies": "#E9C46A",  # Gold/Yellow
 }
 
 JOURNAL_ABBREVIATIONS = {
     "American Economic Review": "AER",
     "Quarterly Journal of Economics": "QJE",
-    "Econometrica": "ECMA",
+    "Econometrica": "Econometrica",
     "Journal of Political Economy": "JPE",
-    "Review of Economic Studies": "REStud",
+    "Review of Economic Studies": "RES",
 }
 
 # Papers data - 2026 issues

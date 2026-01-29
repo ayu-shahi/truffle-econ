@@ -7,7 +7,6 @@ with JEL code visualization.
 
 import streamlit as st
 import plotly.graph_objects as go
-import pandas as pd
 from collections import defaultdict
 import sys
 import os
@@ -24,176 +23,215 @@ from data.papers import (
     get_all_papers, get_journals
 )
 
+# Short names for journals
+JOURNAL_SHORT_NAMES = {
+    "American Economic Review": "AER",
+    "Quarterly Journal of Economics": "QJE",
+    "Journal of Political Economy": "JPE",
+    "Review of Economic Studies": "RES",
+    "Econometrica": "Econometrica",
+}
+
 # Page configuration
 st.set_page_config(
     page_title="truffle.econ",
-    page_icon="📚",
+    page_icon="🍄",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS for dark theme matching the reference design
+# Custom CSS for clean white theme with Tiempos-like font
 st.markdown("""
 <style>
-    /* Main background and text colors */
+    @import url('https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;600;700&display=swap');
+
+    /* Main background and text colors - clean white theme */
     .stApp {
-        background-color: #0a0a0a;
-        color: #00ff88;
+        background-color: #ffffff;
+        color: #1a1a1a;
+    }
+
+    /* Use Source Serif Pro as Tiempos alternative */
+    body, .stMarkdown, p, span, div {
+        font-family: 'Source Serif Pro', Georgia, 'Times New Roman', serif;
     }
 
     /* Header styling */
     .main-header {
-        font-family: 'Courier New', monospace;
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: #00ff88;
-        margin-bottom: 0;
-        letter-spacing: 2px;
+        font-family: 'Source Serif Pro', Georgia, serif;
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 0.2rem;
+        letter-spacing: 0.5px;
     }
 
     .sub-header {
-        font-family: 'Courier New', monospace;
-        font-size: 0.9rem;
+        font-family: 'Source Serif Pro', Georgia, serif;
+        font-size: 1rem;
         color: #666;
         margin-top: 0;
+        font-weight: 400;
     }
 
-    /* Card styling for papers */
-    .paper-card {
-        background-color: #111;
-        border: 1px solid #00ff88;
-        border-radius: 8px;
-        padding: 1rem;
+    /* Legend styling - horizontal layout */
+    .legend-box {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        padding: 0.75rem 0;
         margin-bottom: 1rem;
+        border-bottom: 1px solid #e0e0e0;
     }
 
-    .paper-title {
-        color: #00ff88;
-        font-size: 1.1rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
+    .legend-entry {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .legend-line {
+        width: 24px;
+        height: 3px;
+        border-radius: 2px;
+    }
+
+    .legend-label {
+        font-size: 0.85rem;
+        color: #333;
+        font-weight: 500;
+    }
+
+    /* Paper card styling */
+    .paper-title-text {
+        font-family: 'Source Serif Pro', Georgia, serif;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        line-height: 1.4;
     }
 
     .paper-authors {
-        color: #888;
         font-size: 0.9rem;
-        margin-bottom: 0.5rem;
+        color: #555;
+        margin: 0.3rem 0;
+        font-style: italic;
     }
 
-    .paper-journal {
-        font-size: 0.8rem;
+    .paper-meta {
+        font-size: 0.85rem;
+        color: #666;
+        margin: 0.5rem 0;
+    }
+
+    .journal-badge {
+        display: inline-block;
         padding: 2px 8px;
         border-radius: 4px;
-        display: inline-block;
-        margin-right: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
     }
 
-    .jel-code {
-        background-color: #222;
-        color: #00ff88;
+    .jel-tag {
+        display: inline-block;
+        background-color: #f5f5f5;
+        color: #333;
         font-size: 0.75rem;
         padding: 2px 6px;
         border-radius: 3px;
         margin-right: 4px;
-        font-family: 'Courier New', monospace;
+        margin-bottom: 4px;
+        font-family: 'Consolas', 'Monaco', monospace;
+        border: 1px solid #ddd;
     }
 
-    /* Legend styling */
-    .legend-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        margin: 1rem 0;
-        padding: 0.5rem;
-        background-color: #111;
-        border-radius: 4px;
+    .abstract-text {
+        font-size: 0.9rem;
+        color: #444;
+        line-height: 1.6;
+        margin-top: 0.5rem;
+        text-align: justify;
     }
 
-    .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.8rem;
+    /* Filter section styling */
+    .filter-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
     }
 
-    .legend-color {
-        width: 20px;
-        height: 3px;
-        border-radius: 1px;
-    }
-
-    /* Filter section */
-    .filter-section {
-        background-color: #111;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
+    /* Section headers */
+    .section-header {
+        font-family: 'Source Serif Pro', Georgia, serif;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin: 1.5rem 0 1rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #1a1a1a;
     }
 
     /* Stats display */
-    .stats-display {
-        font-family: 'Courier New', monospace;
-        font-size: 0.8rem;
-        color: #666;
+    .stats-text {
+        font-size: 0.85rem;
+        color: #888;
         text-align: right;
-    }
-
-    /* Streamlit overrides */
-    .stSelectbox label, .stMultiSelect label {
-        color: #00ff88 !important;
-    }
-
-    .stExpander {
-        background-color: #111;
-        border: 1px solid #333;
-    }
-
-    div[data-testid="stExpander"] details summary p {
-        color: #00ff88;
-    }
-
-    /* Scrollbar styling */
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: #111;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: #00ff88;
-        border-radius: 4px;
+        margin-bottom: 0.5rem;
     }
 
     /* Link styling */
     a {
-        color: #00ff88 !important;
+        color: #0066cc !important;
+        text-decoration: none;
     }
-
     a:hover {
-        color: #00ffaa !important;
+        text-decoration: underline;
     }
 
     /* Hide Streamlit branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
 
-    /* Footer text */
+    /* Streamlit widget overrides */
+    .stCheckbox label {
+        font-family: 'Source Serif Pro', Georgia, serif !important;
+        font-size: 0.9rem !important;
+    }
+
+    .stSelectbox label {
+        font-family: 'Source Serif Pro', Georgia, serif !important;
+    }
+
+    /* Expander styling */
+    .streamlit-expanderHeader {
+        font-family: 'Source Serif Pro', Georgia, serif !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        color: #1a1a1a !important;
+    }
+
+    div[data-testid="stExpander"] {
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Footer */
     .footer-text {
         text-align: center;
-        color: #444;
+        color: #999;
         font-size: 0.8rem;
-        margin-top: 2rem;
-        padding: 1rem;
-        border-top: 1px solid #222;
+        margin-top: 3rem;
+        padding: 1.5rem;
+        border-top: 1px solid #e0e0e0;
     }
 </style>
 """, unsafe_allow_html=True)
 
 
-def create_jel_visualization(papers, selected_paper_idx=None):
+def create_jel_visualization(papers, highlighted_paper_idx=None):
     """Create the JEL code visualization using Plotly."""
 
     fig = go.Figure()
@@ -201,8 +239,32 @@ def create_jel_visualization(papers, selected_paper_idx=None):
     # Create a mapping from JEL letter to x position
     letter_to_x = {letter: i for i, letter in enumerate(JEL_LETTERS)}
 
-    # Track which points have papers for hover info
-    point_papers = defaultdict(list)
+    # First, add a background grid of all possible JEL points (subtle)
+    grid_x, grid_y, grid_text = [], [], []
+    for i, letter in enumerate(JEL_LETTERS):
+        for num in range(0, 100, 5):  # Every 5 for grid points
+            code = f"{letter}{num:02d}"
+            desc = get_jel_description(code)
+            grid_x.append(i)
+            grid_y.append(num)
+            if desc != "Unknown":
+                grid_text.append(f"<b>{code}</b><br>{desc}")
+            else:
+                # Try to get category description
+                cat_desc = get_category_name(letter)
+                grid_text.append(f"<b>{code}</b><br>{cat_desc}")
+
+    # Add invisible grid points for hover
+    fig.add_trace(go.Scatter(
+        x=grid_x,
+        y=grid_y,
+        mode='markers',
+        marker=dict(size=8, color='rgba(200,200,200,0.3)', symbol='square'),
+        hovertemplate='%{text}<extra></extra>',
+        text=grid_text,
+        showlegend=False,
+        name='JEL Grid'
+    ))
 
     # Add lines for each paper connecting its JEL codes
     for paper_idx, paper in enumerate(papers):
@@ -217,290 +279,286 @@ def create_jel_visualization(papers, selected_paper_idx=None):
                 x = letter_to_x[letter]
                 y = number
                 coords.append((x, y, code))
-                point_papers[(x, y)].append((paper.title, code, paper_idx))
 
         if len(coords) < 1:
             continue
 
         # Get journal color
         color = JOURNAL_COLORS.get(paper.journal, "#888888")
+        abbrev = JOURNAL_SHORT_NAMES.get(paper.journal, paper.journal[:3])
 
-        # Determine line width and opacity
-        is_selected = selected_paper_idx is not None and paper_idx == selected_paper_idx
-        line_width = 3 if is_selected else 1.5
-        opacity = 1.0 if is_selected or selected_paper_idx is None else 0.3
+        # Determine if this paper is highlighted
+        is_highlighted = highlighted_paper_idx is not None and paper_idx == highlighted_paper_idx
+
+        # Set opacity based on highlight state
+        if highlighted_paper_idx is not None:
+            opacity = 1.0 if is_highlighted else 0.15
+            line_width = 4 if is_highlighted else 1.5
+            marker_size = 10 if is_highlighted else 5
+        else:
+            opacity = 0.8
+            line_width = 2
+            marker_size = 6
 
         # Sort coords by x then y for consistent drawing
         coords.sort(key=lambda c: (c[0], c[1]))
 
-        # Draw lines connecting JEL codes
-        if len(coords) >= 2:
-            xs = [c[0] for c in coords]
-            ys = [c[1] for c in coords]
+        # Build JEL codes string for hover
+        jel_codes_str = ", ".join([c[2] for c in coords])
 
-            fig.add_trace(go.Scatter(
-                x=xs,
-                y=ys,
-                mode='lines+markers',
-                line=dict(color=color, width=line_width),
-                marker=dict(size=6 if is_selected else 4, color=color),
-                opacity=opacity,
-                name=paper.title[:40] + "..." if len(paper.title) > 40 else paper.title,
-                hovertemplate=f"<b>{paper.title[:50]}...</b><br>" +
-                             f"Journal: {JOURNAL_ABBREVIATIONS.get(paper.journal, paper.journal)}<br>" +
-                             "JEL: %{text}<extra></extra>",
-                text=[c[2] for c in coords],
-                customdata=[paper_idx] * len(coords),
-                showlegend=False
-            ))
-        else:
-            # Single JEL code - just a point
-            fig.add_trace(go.Scatter(
-                x=[coords[0][0]],
-                y=[coords[0][1]],
-                mode='markers',
-                marker=dict(size=8 if is_selected else 5, color=color),
-                opacity=opacity,
-                name=paper.title[:40] + "..." if len(paper.title) > 40 else paper.title,
-                hovertemplate=f"<b>{paper.title[:50]}...</b><br>" +
-                             f"Journal: {JOURNAL_ABBREVIATIONS.get(paper.journal, paper.journal)}<br>" +
-                             f"JEL: {coords[0][2]}<extra></extra>",
-                customdata=[paper_idx],
-                showlegend=False
-            ))
+        # Create hover text with paper info
+        hover_text = (
+            f"<b>{paper.title}</b><br>"
+            f"<i>{abbrev}</i><br>"
+            f"JEL: {jel_codes_str}"
+        )
 
-    # Add invisible scatter for all JEL points to show hover info
-    all_x, all_y, all_text = [], [], []
-    for i, letter in enumerate(JEL_LETTERS):
-        for num in range(0, 100, 10):  # Sample every 10 for cleaner display
-            code = f"{letter}{num:02d}"
-            desc = get_jel_description(code)
-            if desc != "Unknown":
-                all_x.append(i)
-                all_y.append(num)
-                all_text.append(f"{code}: {desc}")
+        xs = [c[0] for c in coords]
+        ys = [c[1] for c in coords]
 
-    # Configure layout for dark theme
+        fig.add_trace(go.Scatter(
+            x=xs,
+            y=ys,
+            mode='lines+markers',
+            line=dict(color=color, width=line_width),
+            marker=dict(size=marker_size, color=color),
+            opacity=opacity,
+            hovertemplate=hover_text + '<extra></extra>',
+            customdata=[paper_idx] * len(coords),
+            showlegend=False,
+            name=paper.title[:30]
+        ))
+
+    # Configure layout for clean white theme
     fig.update_layout(
-        plot_bgcolor='#0a0a0a',
-        paper_bgcolor='#0a0a0a',
-        font=dict(color='#00ff88', family='Courier New'),
+        plot_bgcolor='#fafafa',
+        paper_bgcolor='#ffffff',
+        font=dict(color='#333', family='Source Serif Pro, Georgia, serif'),
         xaxis=dict(
             tickmode='array',
             tickvals=list(range(len(JEL_LETTERS))),
             ticktext=JEL_LETTERS,
             title=None,
-            gridcolor='#222',
+            gridcolor='#e8e8e8',
             showgrid=True,
             zeroline=False,
-            tickfont=dict(size=10),
+            tickfont=dict(size=11, color='#555'),
+            side='top',
+            fixedrange=True,  # Disable zoom
         ),
         yaxis=dict(
             title=None,
-            range=[100, -5],  # Inverted so 0 is at top
-            gridcolor='#222',
+            range=[-2, 100],
+            gridcolor='#e8e8e8',
             showgrid=True,
             zeroline=False,
-            tickfont=dict(size=10),
+            tickfont=dict(size=10, color='#555'),
             dtick=10,
+            fixedrange=True,  # Disable zoom
         ),
-        margin=dict(l=40, r=20, t=30, b=40),
-        height=400,
+        margin=dict(l=40, r=20, t=40, b=20),
+        height=450,
         hovermode='closest',
         showlegend=False,
+        dragmode=False,  # Disable drag/selection
     )
 
     return fig
 
 
-def create_legend():
-    """Create the journal color legend."""
-    legend_html = '<div class="legend-container">'
+def create_legend_html():
+    """Create the journal color legend as HTML."""
+    items = []
     for journal, color in JOURNAL_COLORS.items():
-        abbrev = JOURNAL_ABBREVIATIONS.get(journal, journal[:3])
-        legend_html += f'''
-            <div class="legend-item">
-                <div class="legend-color" style="background-color: {color};"></div>
-                <span style="color: {color};">{abbrev}</span>
-            </div>
-        '''
-    legend_html += '</div>'
-    return legend_html
+        short_name = JOURNAL_SHORT_NAMES.get(journal, journal[:3])
+        items.append(
+            f'<div class="legend-entry">'
+            f'<div class="legend-line" style="background-color: {color};"></div>'
+            f'<span class="legend-label">{short_name}</span>'
+            f'</div>'
+        )
+    return '<div class="legend-box">' + ''.join(items) + '</div>'
 
 
-def display_paper_card(paper, idx):
-    """Display a paper as an expandable card."""
+def display_paper(paper, paper_id):
+    """Display a paper as an expandable section."""
     color = JOURNAL_COLORS.get(paper.journal, "#888888")
-    abbrev = JOURNAL_ABBREVIATIONS.get(paper.journal, paper.journal[:3])
+    abbrev = JOURNAL_SHORT_NAMES.get(paper.journal, paper.journal[:3])
 
-    # Create expander for each paper
-    with st.expander(f"**{paper.title}**", expanded=False):
+    with st.expander(paper.title, expanded=False):
         # Authors
-        st.markdown(f"*{', '.join(paper.authors)}*")
+        st.markdown(f'<p class="paper-authors">{", ".join(paper.authors)}</p>',
+                   unsafe_allow_html=True)
 
-        # Journal and date
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            st.markdown(
-                f'<span class="paper-journal" style="background-color: {color}22; '
-                f'border: 1px solid {color}; color: {color};">{abbrev}</span>'
-                f'<span style="color: #666; font-size: 0.8rem;">'
-                f'{paper.month:02d}/{paper.year}'
-                f'{" • Vol. " + str(paper.volume) if paper.volume else ""}'
-                f'{", No. " + str(paper.issue) if paper.issue else ""}'
-                f'{" • pp. " + paper.pages if paper.pages else ""}</span>',
-                unsafe_allow_html=True
-            )
-        with col2:
-            if paper.url:
-                st.markdown(f'[📄 Full Text]({paper.url})')
+        # Journal badge and metadata
+        meta_html = (
+            f'<span class="journal-badge" style="background-color: {color}22; '
+            f'border: 1px solid {color}; color: {color};">{abbrev}</span>'
+            f'<span class="paper-meta">'
+        )
+
+        if paper.volume:
+            meta_html += f'Vol. {paper.volume}'
+        if paper.issue:
+            meta_html += f', No. {paper.issue}'
+        if paper.pages:
+            meta_html += f', pp. {paper.pages}'
+        meta_html += f' ({paper.month}/{paper.year})</span>'
+
+        st.markdown(meta_html, unsafe_allow_html=True)
 
         # JEL codes
-        jel_html = " ".join([f'<span class="jel-code">{code}</span>' for code in paper.jel_codes])
-        st.markdown(f'<div style="margin: 0.5rem 0;">{jel_html}</div>', unsafe_allow_html=True)
+        jel_html = ''.join([f'<span class="jel-tag">{code}</span>' for code in paper.jel_codes])
+        st.markdown(f'<div style="margin: 0.75rem 0;">{jel_html}</div>', unsafe_allow_html=True)
 
         # Abstract
         if paper.abstract:
-            st.markdown("**Abstract:**")
-            st.markdown(f'<p style="color: #aaa; font-size: 0.9rem;">{paper.abstract}</p>',
-                       unsafe_allow_html=True)
+            st.markdown(f'<p class="abstract-text">{paper.abstract}</p>', unsafe_allow_html=True)
+
+        # Link to full text
+        if paper.url:
+            st.markdown(f'[Read full text →]({paper.url})')
 
 
 def main():
     # Header
-    st.markdown('<h1 class="main-header">TRUFFLE.ECON</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">JEL CODE MAP</p>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">truffle.econ</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Browse the latest from top economics journals</p>', unsafe_allow_html=True)
 
-    # Get all papers
+    # Get all papers and journals
     all_papers = get_all_papers()
     journals = get_journals()
 
-    # Create legend
-    st.markdown(create_legend(), unsafe_allow_html=True)
+    # Legend
+    st.markdown(create_legend_html(), unsafe_allow_html=True)
 
-    # Sidebar filters (but we'll put them in main area for this design)
-    col_filter1, col_filter2, col_filter3 = st.columns(3)
+    # === FILTERS FOR GRAPH ===
+    st.markdown('<p class="filter-label">Filter journals:</p>', unsafe_allow_html=True)
 
-    with col_filter1:
-        selected_journals = st.multiselect(
-            "Filter by Journal",
-            options=journals,
-            default=journals,
-            key="journal_filter"
+    # Journal checkboxes in a row
+    journal_cols = st.columns(5)
+    selected_journals = []
+
+    for i, journal in enumerate(journals):
+        short_name = JOURNAL_SHORT_NAMES.get(journal, journal[:3])
+        with journal_cols[i]:
+            if st.checkbox(short_name, value=True, key=f"graph_journal_{i}"):
+                selected_journals.append(journal)
+
+    # Month filter dropdown
+    month_options = sorted(set((p.year, p.month) for p in all_papers), reverse=True)
+    month_labels = ["All months"] + [f"{m:02d}/{y}" for y, m in month_options]
+    month_values = [None] + list(month_options)
+
+    col1, col2, col3 = st.columns([1, 1, 2])
+    with col1:
+        selected_month_idx = st.selectbox(
+            "Month/Year",
+            options=range(len(month_labels)),
+            format_func=lambda x: month_labels[x],
+            key="graph_month_filter"
+        )
+    selected_month = month_values[selected_month_idx]
+
+    # Filter papers for graph
+    graph_papers = all_papers.copy()
+
+    if selected_journals:
+        graph_papers = [p for p in graph_papers if p.journal in selected_journals]
+    else:
+        graph_papers = []
+
+    if selected_month:
+        graph_papers = [p for p in graph_papers if (p.year, p.month) == selected_month]
+
+    # Stats
+    with col3:
+        st.markdown(
+            f'<p class="stats-text">{len(graph_papers)} papers displayed</p>',
+            unsafe_allow_html=True
         )
 
-    with col_filter2:
-        # Get unique broad topics (first letter of JEL codes)
-        all_topics = set()
-        for paper in all_papers:
-            for code in paper.jel_codes:
-                if code:
-                    all_topics.add(code[0])
-        topic_options = sorted(all_topics)
-        topic_labels = {t: f"{t} - {get_category_name(t)}" for t in topic_options}
+    # JEL Visualization
+    fig = create_jel_visualization(graph_papers)
 
-        selected_topics = st.multiselect(
-            "Filter by Topic (JEL Category)",
-            options=topic_options,
-            format_func=lambda x: topic_labels.get(x, x),
-            default=[],
-            key="topic_filter"
-        )
+    # Display chart with disabled interactivity except hover
+    st.plotly_chart(
+        fig,
+        use_container_width=True,
+        config={
+            'displayModeBar': False,
+            'scrollZoom': False,
+            'doubleClick': False,
+        }
+    )
 
-    with col_filter3:
-        month_options = sorted(set((p.year, p.month) for p in all_papers), reverse=True)
-        month_labels = {(y, m): f"{m:02d}/{y}" for y, m in month_options}
-        selected_months = st.multiselect(
-            "Filter by Month",
-            options=month_options,
-            format_func=lambda x: month_labels.get(x, str(x)),
-            default=[],
-            key="month_filter"
+    # === PAPERS SECTION ===
+    st.markdown('<h2 class="section-header">Papers</h2>', unsafe_allow_html=True)
+
+    # Filters for papers section
+    st.markdown('<p class="filter-label">Filter papers:</p>', unsafe_allow_html=True)
+
+    # Journal checkboxes for papers
+    paper_journal_cols = st.columns(5)
+    paper_selected_journals = []
+
+    for i, journal in enumerate(journals):
+        short_name = JOURNAL_SHORT_NAMES.get(journal, journal[:3])
+        with paper_journal_cols[i]:
+            if st.checkbox(short_name, value=True, key=f"paper_journal_{i}"):
+                paper_selected_journals.append(journal)
+
+    # Month dropdown for papers
+    pcol1, pcol2, pcol3 = st.columns([1, 1, 2])
+    with pcol1:
+        paper_month_idx = st.selectbox(
+            "Issue",
+            options=range(len(month_labels)),
+            format_func=lambda x: month_labels[x],
+            key="paper_month_filter"
         )
+    paper_selected_month = month_values[paper_month_idx]
 
     # Filter papers
     filtered_papers = all_papers.copy()
 
-    if selected_journals:
-        filtered_papers = [p for p in filtered_papers if p.journal in selected_journals]
+    if paper_selected_journals:
+        filtered_papers = [p for p in filtered_papers if p.journal in paper_selected_journals]
+    else:
+        filtered_papers = []
 
-    if selected_topics:
-        filtered_papers = [p for p in filtered_papers
-                         if any(code[0] in selected_topics for code in p.jel_codes if code)]
+    if paper_selected_month:
+        filtered_papers = [p for p in filtered_papers if (p.year, p.month) == paper_selected_month]
 
-    if selected_months:
-        filtered_papers = [p for p in filtered_papers
-                         if (p.year, p.month) in selected_months]
+    # Sort by journal then by title
+    filtered_papers.sort(key=lambda p: (p.journal, p.title))
 
-    # Stats display
-    st.markdown(
-        f'<p class="stats-display">{len(filtered_papers)} papers • '
-        f'{len(set(p.journal for p in filtered_papers))} journals • '
-        f'{len(set(c for p in filtered_papers for c in p.jel_codes))} unique JEL codes</p>',
-        unsafe_allow_html=True
-    )
-
-    # JEL Visualization
-    fig = create_jel_visualization(filtered_papers)
-    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-
-    # X-axis label explaining the letters
-    st.markdown(
-        '<p style="text-align: center; color: #444; font-size: 0.75rem; margin-top: -20px;">'
-        'JEL Categories: A-General • B-History of Thought • C-Quantitative Methods • D-Micro • '
-        'E-Macro • F-International • G-Finance • H-Public • I-Health/Education • J-Labor • '
-        'K-Law • L-Industrial Org • M-Business • N-Economic History • O-Development • P-Systems • '
-        'Q-Agricultural/Environmental • R-Urban/Regional • Y-Misc • Z-Other</p>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown("---")
-
-    # Papers section header
-    st.markdown('<h2 style="color: #00ff88; font-family: Courier New;">PAPERS</h2>',
-               unsafe_allow_html=True)
-
-    # Sort options
-    sort_col1, sort_col2 = st.columns([3, 1])
-    with sort_col2:
-        sort_option = st.selectbox(
-            "Sort by",
-            options=["Journal", "Date (Newest)", "Date (Oldest)", "Title"],
-            key="sort_option"
+    # Display count
+    with pcol3:
+        st.markdown(
+            f'<p class="stats-text">{len(filtered_papers)} papers</p>',
+            unsafe_allow_html=True
         )
 
-    # Sort papers
-    if sort_option == "Journal":
-        filtered_papers.sort(key=lambda p: (p.journal, -p.year, -p.month, p.title))
-    elif sort_option == "Date (Newest)":
-        filtered_papers.sort(key=lambda p: (-p.year, -p.month, p.title))
-    elif sort_option == "Date (Oldest)":
-        filtered_papers.sort(key=lambda p: (p.year, p.month, p.title))
-    else:
-        filtered_papers.sort(key=lambda p: p.title)
-
-    # Group and display papers
-    if sort_option == "Journal":
-        current_journal = None
-        for idx, paper in enumerate(filtered_papers):
-            if paper.journal != current_journal:
-                current_journal = paper.journal
-                color = JOURNAL_COLORS.get(current_journal, "#888")
-                st.markdown(
-                    f'<h3 style="color: {color}; font-family: Courier New; '
-                    f'margin-top: 1.5rem; margin-bottom: 0.5rem;">{current_journal}</h3>',
-                    unsafe_allow_html=True
-                )
-            display_paper_card(paper, idx)
-    else:
-        for idx, paper in enumerate(filtered_papers):
-            display_paper_card(paper, idx)
+    # Display papers grouped by journal
+    current_journal = None
+    for idx, paper in enumerate(filtered_papers):
+        if paper.journal != current_journal:
+            current_journal = paper.journal
+            color = JOURNAL_COLORS.get(current_journal, "#888")
+            short_name = JOURNAL_SHORT_NAMES.get(current_journal, current_journal)
+            st.markdown(
+                f'<h3 style="color: {color}; margin-top: 1.5rem; margin-bottom: 0.75rem; '
+                f'font-family: Source Serif Pro, Georgia, serif; font-weight: 600;">'
+                f'{short_name}</h3>',
+                unsafe_allow_html=True
+            )
+        display_paper(paper, f"paper_{idx}")
 
     # Footer
     st.markdown(
         '<div class="footer-text">'
-        'truffle.econ • Data from AER, QJE, Econometrica, JPE, REStud<br>'
-        'Built with Streamlit • Explore economics research'
+        'truffle.econ · Data from AER, QJE, Econometrica, JPE, RES<br>'
         '</div>',
         unsafe_allow_html=True
     )
