@@ -23,12 +23,12 @@ from data.papers import (
     get_all_papers, get_journals
 )
 
-# Short names for journals
+# Short names for journals (used in checkboxes and legend)
 JOURNAL_SHORT_NAMES = {
     "American Economic Review": "AER",
     "Quarterly Journal of Economics": "QJE",
     "Journal of Political Economy": "JPE",
-    "Review of Economic Studies": "RES",
+    "Review of Economic Studies": "REStud",
     "Econometrica": "Econometrica",
 }
 
@@ -194,14 +194,33 @@ st.markdown("""
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
 
-    /* Streamlit widget overrides */
+    /* Streamlit checkbox overrides - fix for mobile visibility */
     .stCheckbox label {
         font-family: 'Source Serif Pro', Georgia, serif !important;
         font-size: 0.9rem !important;
+        color: #333 !important;
+    }
+
+    .stCheckbox label p {
+        color: #333 !important;
+    }
+
+    .stCheckbox label span {
+        color: #333 !important;
+    }
+
+    /* Ensure checkbox text is visible on all devices */
+    [data-testid="stCheckbox"] label {
+        color: #333 !important;
+    }
+
+    [data-testid="stCheckbox"] p {
+        color: #333 !important;
     }
 
     .stSelectbox label {
         font-family: 'Source Serif Pro', Georgia, serif !important;
+        color: #333 !important;
     }
 
     /* Expander styling */
@@ -226,6 +245,14 @@ st.markdown("""
         margin-top: 3rem;
         padding: 1.5rem;
         border-top: 1px solid #e0e0e0;
+    }
+
+    /* Journal header in papers section */
+    .journal-header {
+        font-family: 'Source Serif Pro', Georgia, serif;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -435,6 +462,11 @@ def main():
     # === FILTERS FOR GRAPH ===
     st.markdown('<p class="filter-label">Filter journals:</p>', unsafe_allow_html=True)
 
+    # Select/Deselect All for graph
+    select_all_col, spacer_col = st.columns([1, 4])
+    with select_all_col:
+        select_all_graph = st.checkbox("Select All", value=True, key="select_all_graph")
+
     # Journal checkboxes in a row
     journal_cols = st.columns(5)
     selected_journals = []
@@ -442,7 +474,9 @@ def main():
     for i, journal in enumerate(journals):
         short_name = JOURNAL_SHORT_NAMES.get(journal, journal[:3])
         with journal_cols[i]:
-            if st.checkbox(short_name, value=True, key=f"graph_journal_{i}"):
+            # Use select_all state to determine default
+            checked = st.checkbox(short_name, value=select_all_graph, key=f"graph_journal_{i}")
+            if checked:
                 selected_journals.append(journal)
 
     # Month filter dropdown
@@ -498,6 +532,11 @@ def main():
     # Filters for papers section
     st.markdown('<p class="filter-label">Filter papers:</p>', unsafe_allow_html=True)
 
+    # Select/Deselect All for papers
+    select_all_paper_col, spacer_paper_col = st.columns([1, 4])
+    with select_all_paper_col:
+        select_all_papers = st.checkbox("Select All", value=True, key="select_all_papers")
+
     # Journal checkboxes for papers
     paper_journal_cols = st.columns(5)
     paper_selected_journals = []
@@ -505,7 +544,8 @@ def main():
     for i, journal in enumerate(journals):
         short_name = JOURNAL_SHORT_NAMES.get(journal, journal[:3])
         with paper_journal_cols[i]:
-            if st.checkbox(short_name, value=True, key=f"paper_journal_{i}"):
+            checked = st.checkbox(short_name, value=select_all_papers, key=f"paper_journal_{i}")
+            if checked:
                 paper_selected_journals.append(journal)
 
     # Month dropdown for papers
@@ -540,17 +580,16 @@ def main():
             unsafe_allow_html=True
         )
 
-    # Display papers grouped by journal
+    # Display papers grouped by journal (use FULL journal name in header)
     current_journal = None
     for idx, paper in enumerate(filtered_papers):
         if paper.journal != current_journal:
             current_journal = paper.journal
             color = JOURNAL_COLORS.get(current_journal, "#888")
-            short_name = JOURNAL_SHORT_NAMES.get(current_journal, current_journal)
+            # Use FULL journal name for headers
             st.markdown(
-                f'<h3 style="color: {color}; margin-top: 1.5rem; margin-bottom: 0.75rem; '
-                f'font-family: Source Serif Pro, Georgia, serif; font-weight: 600;">'
-                f'{short_name}</h3>',
+                f'<h3 class="journal-header" style="color: {color};">'
+                f'{current_journal}</h3>',
                 unsafe_allow_html=True
             )
         display_paper(paper, f"paper_{idx}")
@@ -558,7 +597,7 @@ def main():
     # Footer
     st.markdown(
         '<div class="footer-text">'
-        'truffle.econ · Data from AER, QJE, Econometrica, JPE, RES<br>'
+        'truffle.econ · Created by Ayush Shahi'
         '</div>',
         unsafe_allow_html=True
     )

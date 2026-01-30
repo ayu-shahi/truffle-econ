@@ -35,7 +35,7 @@ JOURNAL_ABBREVIATIONS = {
     "Quarterly Journal of Economics": "QJE",
     "Econometrica": "Econometrica",
     "Journal of Political Economy": "JPE",
-    "Review of Economic Studies": "RES",
+    "Review of Economic Studies": "REStud",
 }
 
 # Papers data - 2026 issues
@@ -192,28 +192,28 @@ PAPERS_2026 = [
         authors=["John A. List"],
         journal="Journal of Political Economy",
         jel_codes=["I21", "I24", "I28", "J13", "J24"],
-        abstract="This paper examines the challenges and lessons learned from scaling early childhood education programs, drawing on evidence from Chicago school initiatives. We analyze how program effects change when interventions move from small-scale pilots to large-scale implementation, identifying key factors that influence scalability and effectiveness.",
-        url="https://www.journals.uchicago.edu/doi/10.1086/735071",
+        abstract="This paper develops a dynamic microfounded human capital model stylized in the Chicago tradition, featuring optimizing agents, complementary skill formation, and a policymaker choosing scaling strategies. The model highlights three potential barriers to scaling—human capital, market forces, and diminishing treatment effects—while demonstrating that insights from recent empirical work on early childhood programs can inform both theory and policy.",
+        url="https://www.journals.uchicago.edu/doi/full/10.1086/739436",
         year=2026,
         month=1,
         volume=134,
         issue=1,
         pages="1-48",
-        doi="10.1086/735071"
+        doi="10.1086/739436"
     ),
     Paper(
         title="A Study of the Microdynamics of Early-Childhood Learning",
         authors=["James J. Heckman", "Jin Zhou"],
         journal="Journal of Political Economy",
         jel_codes=["I21", "I24", "J13", "J24", "D91"],
-        abstract="We investigate how young children acquire skills through a detailed analysis of the microdynamics of early-childhood learning. Using novel data and methods, we characterize the processes through which children develop cognitive and non-cognitive skills during the critical early years.",
-        url="https://www.journals.uchicago.edu/doi/10.1086/735072",
+        abstract="We investigate the weekly evolution of child skills as measured by unique data from a widely-emulated early childhood home-visiting program developed in Jamaica, adapted to rural China, and applied in different versions worldwide. Skills that are nominally classified as the same, in fact, do not appear to share a common unit scale across levels. They are produced by skill-specific, lifecycle-stage-specific technologies. We formulate and estimate a new dynamic stochastic skill production model for multiple skills that is consistent with the evidence. We quantify the dynamics of early life learning. The model explains the 'fadeout' of measures of learning by the emergence of new skills not properly measured.",
+        url="https://www.journals.uchicago.edu/doi/full/10.1086/739256",
         year=2026,
         month=1,
         volume=134,
         issue=1,
         pages="49-85",
-        doi="10.1086/735072"
+        doi="10.1086/739256"
     ),
     Paper(
         title="Why Don't Struggling Students Do Their Homework? Disentangling Motivation from Productivity",
@@ -230,18 +230,18 @@ PAPERS_2026 = [
         doi="10.1086/735073"
     ),
     Paper(
-        title="Child Skill Production: Parental and Market Investments",
+        title="Child Skill Production: Accounting for Parental and Market-Based Time and Goods Investments",
         authors=["Elizabeth Caucutt", "Lance Lochner", "Joseph Mullins", "Youngmin Park"],
         journal="Journal of Political Economy",
         jel_codes=["I21", "I24", "J13", "J24", "D13"],
-        abstract="We analyze how parental and market investments interact to shape child skill production. Our structural model quantifies the relative contributions of different investment types and examines how policy interventions might improve child development outcomes.",
-        url="https://www.journals.uchicago.edu/doi/10.1086/735074",
+        abstract="We develop and estimate a model of child skill production that incorporates endogenous parental time and goods investments, child care, and schooling. Using data from the PSID-CDS, we estimate skill production functions that account for measurement error and unobserved heterogeneity in child skills. We find that early parental time investments are critical for child development, while the productivity of goods investments increases with child age. Our analysis reveals substantial inequality in parental investments and child skills.",
+        url="https://www.journals.uchicago.edu/doi/full/10.1086/738480",
         year=2026,
         month=1,
         volume=134,
         issue=1,
         pages="150-209",
-        doi="10.1086/735074"
+        doi="10.1086/738480"
     ),
     Paper(
         title="Parenting with Patience: How Parental Incentives Shape Child Development",
@@ -272,46 +272,46 @@ PAPERS_2026 = [
         doi="10.1086/735076"
     ),
     Paper(
-        title="It Takes a Village: Neighborhood and Peer Effects on Parenting",
+        title="It Takes a Village: The Economics of Parenting with Neighborhood and Peer Effects",
         authors=["Francesco Agostinelli", "Matthias Doepke", "Giuseppe Sorrenti", "Fabrizio Zilibotti"],
         journal="Journal of Political Economy",
         jel_codes=["D13", "I21", "J13", "R23", "Z13"],
-        abstract="We examine how neighborhood and peer influences shape parenting decisions. Our analysis reveals the importance of social context in determining parenting styles and child outcomes, with implications for understanding spatial inequality in child development.",
-        url="https://www.journals.uchicago.edu/doi/10.1086/735077",
+        abstract="During adolescence, peer interactions become increasingly central to children's development, whereas the direct influence of parents wanes. Nevertheless, parents can continue to exert leverage by shaping their children's peer groups. We construct and estimate a model of parenting with peer and neighborhood effects where parents intervene in peer formation. We show that the model captures empirical patterns of skill accumulation, parenting style, and peer characteristics among US high school students. Interventions that move children to better neighborhoods lose impact when they are scaled up, because parents' equilibrium responses push against successful integration with the new peer group.",
+        url="https://www.journals.uchicago.edu/doi/full/10.1086/739334",
         year=2026,
         month=1,
         volume=134,
         issue=1,
         pages="313-365",
-        doi="10.1086/735077"
+        doi="10.1086/739334"
     ),
     Paper(
         title="Mentoring and Schooling Decisions: Causal Evidence",
         authors=["Armin Falk", "Fabian Kosse", "Pia Pinger"],
         journal="Journal of Political Economy",
         jel_codes=["I21", "I24", "J13", "J24", "C93"],
-        abstract="We provide causal evidence on the effects of mentorship on schooling decisions. Using a randomized controlled trial, we demonstrate how mentoring interventions can influence educational trajectories and long-term outcomes.",
-        url="https://www.journals.uchicago.edu/doi/10.1086/735078",
+        abstract="Inequality of opportunity arises when children of equal academic performance are sent to different-quality schools because their parents differ in socioeconomic status. We provide evidence that children from low-SES families are significantly less likely to enter the academic track, even after conditioning on prior school performance. We show that a low-intensity mentoring program can improve the education outcomes of low-SES children and reduce inequality of opportunity. Low-SES children randomly assigned to mentors for one year are 20 percent more likely to enter a high-track program. Mentorship affects both parents and children and has positive long-term implications for children's educational trajectories.",
+        url="https://www.journals.uchicago.edu/doi/full/10.1086/738484",
         year=2026,
         month=1,
         volume=134,
         issue=1,
         pages="366-396",
-        doi="10.1086/735078"
+        doi="10.1086/738484"
     ),
     Paper(
-        title="Exercise Improves Academic Performance: Evidence from a Field Experiment",
+        title="Exercise Improves Academic Performance",
         authors=["Alexander W. Cappelen", "Gary Charness", "Mathias Ekström", "Uri Gneezy", "Bertil Tungodden"],
         journal="Journal of Political Economy",
         jel_codes=["I12", "I21", "I26", "J24", "C93"],
-        abstract="We present evidence from a field experiment showing that exercise improves academic performance. Our results demonstrate the causal impact of physical activity on cognitive outcomes and educational achievement.",
-        url="https://www.journals.uchicago.edu/doi/10.1086/735079",
+        abstract="In a randomized controlled trial, we test whether removal of a barrier to exercise can improve academic performance. We find strong support for this hypothesis: University students who were provided with a free gym card exercised more and had a significant improvement in academic performance. The treated students were less likely to drop out of classes and to fail at the exam. We provide evidence showing that exercise caused a healthier lifestyle and increased perceived self-control, which ultimately improved academic performance.",
+        url="https://www.journals.uchicago.edu/doi/full/10.1086/738251",
         year=2026,
         month=1,
         volume=134,
         issue=1,
         pages="397-434",
-        doi="10.1086/735079"
+        doi="10.1086/738251"
     ),
     Paper(
         title="A Structural Meta-Analysis of Welfare Reform Experiments and Their Impacts on Children",
@@ -448,14 +448,14 @@ PAPERS_2026 = [
         authors=["Javier D. Donna", "José A. Espín-Sánchez"],
         journal="Review of Economic Studies",
         jel_codes=["D44", "L95", "Q25", "Q28"],
-        abstract="We examine why water markets remain illiquid despite growing scarcity. Our analysis identifies institutional and economic barriers to water trading and proposes mechanisms to improve market function.",
-        url="https://academic.oup.com/restud/advance-article/doi/10.1093/restud/rdaf008",
+        abstract="We investigate the efficiency of a market relative to a non-market institution—an auction relative to a quota—as allocation mechanisms in the presence of frictions. We use data from water markets in southeastern Spain and explore a specific change in the institutions to allocate water. We find that frictions arose because poor farmers were liquidity constrained while wealthy elite farmers were not. The introduction of auctions led to reallocation from poor to rich farmers, reducing aggregate output despite improving allocative efficiency.",
+        url="https://academic.oup.com/restud/advance-article-abstract/doi/10.1093/restud/rdag004/8427442",
         year=2026,
         month=1,
         volume=92,
         issue=None,
         pages=None,
-        doi="10.1093/restud/rdaf008"
+        doi="10.1093/restud/rdag004"
     ),
 
     # ============================================
@@ -624,14 +624,14 @@ PAPERS_2026 = [
         authors=["Adam Copeland", "Darrell Duffie", "Yilin (David) Yang"],
         journal="Quarterly Journal of Economics",
         jel_codes=["E44", "E52", "E58", "G21"],
-        abstract="We examine the adequacy of bank reserves during recent market stress episodes. Our analysis reveals that reserves, despite appearing ample in aggregate, were not sufficiently well-distributed to prevent funding market disruptions.",
-        url="https://academic.oup.com/qje/article/141/1",
+        abstract="We examine the likelihood of a liquidity crunch in wholesale US dollar funding markets and show that it is highly dependent on levels of reserve balances at the financial institutions that are the most active intermediaries of these markets. Even when aggregate reserves are ample, the uneven distribution of reserves among banks can lead to funding stress when large payment shocks occur. We provide evidence from the September 2019 repo market stress episode and the March 2020 Treasury market stress.",
+        url="https://academic.oup.com/qje/article/140/1/239/7822516",
         year=2026,
         month=2,
-        volume=141,
+        volume=140,
         issue=1,
-        pages=None,
-        doi=None
+        pages="239-281",
+        doi="10.1093/qje/qjae034"
     ),
     Paper(
         title="LinkedOut? A Field Experiment on Discrimination in Job Network Formation",
@@ -652,14 +652,14 @@ PAPERS_2026 = [
         authors=["Supreet Kaur", "Sendhil Mullainathan", "Suanna Oh", "Frank Schilbach"],
         journal="Quarterly Journal of Economics",
         jel_codes=["D91", "G51", "J24", "O12"],
-        abstract="We investigate how financial concerns affect worker productivity. Our experimental evidence demonstrates that financial stress impairs cognitive function and reduces work output.",
-        url="https://academic.oup.com/qje/article/141/1",
+        abstract="Workers who are worried about their personal finances may find it hard to focus at work. If so, reducing financial concerns could increase productivity. We test this hypothesis in a sample of low-income Indian piece-rate manufacturing workers. We stagger when wages are paid out: some workers are paid earlier and receive a cash infusion while others remain liquidity constrained. In our study sample of rural Indian workers, 70% stated they were 'very worried' about their finances, and they reported being distracted at work by financial worries on 50% of days. We find that the earlier payment significantly increases productivity.",
+        url="https://academic.oup.com/qje/article/140/1/635/7911839",
         year=2026,
         month=2,
-        volume=141,
+        volume=140,
         issue=1,
-        pages=None,
-        doi=None
+        pages="635-689",
+        doi="10.1093/qje/qjae038"
     ),
 ]
 
