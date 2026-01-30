@@ -462,16 +462,18 @@ def main():
     # === FILTERS FOR GRAPH ===
     st.markdown('<p class="filter-label">Filter journals:</p>', unsafe_allow_html=True)
 
-    # Initialize session state for graph journal selections
-    if "graph_journals_selected" not in st.session_state:
-        st.session_state.graph_journals_selected = {j: True for j in journals}
+    # Initialize session state for graph journal checkbox keys
+    for i, journal in enumerate(journals):
+        key = f"graph_journal_{i}"
+        if key not in st.session_state:
+            st.session_state[key] = True
 
     # Deselect All button for graph
     deselect_col, spacer_col = st.columns([1, 4])
     with deselect_col:
         if st.button("Deselect All", key="deselect_all_graph"):
-            for j in journals:
-                st.session_state.graph_journals_selected[j] = False
+            for i in range(len(journals)):
+                st.session_state[f"graph_journal_{i}"] = False
             st.rerun()
 
     # Journal checkboxes in a row
@@ -483,10 +485,8 @@ def main():
         with journal_cols[i]:
             checked = st.checkbox(
                 short_name,
-                value=st.session_state.graph_journals_selected.get(journal, True),
                 key=f"graph_journal_{i}"
             )
-            st.session_state.graph_journals_selected[journal] = checked
             if checked:
                 selected_journals.append(journal)
 
@@ -543,16 +543,18 @@ def main():
     # Filters for papers section
     st.markdown('<p class="filter-label">Filter papers:</p>', unsafe_allow_html=True)
 
-    # Initialize session state for paper journal selections
-    if "paper_journals_selected" not in st.session_state:
-        st.session_state.paper_journals_selected = {j: True for j in journals}
+    # Initialize session state for paper journal checkbox keys
+    for i, journal in enumerate(journals):
+        key = f"paper_journal_{i}"
+        if key not in st.session_state:
+            st.session_state[key] = True
 
     # Deselect All button for papers
     deselect_paper_col, spacer_paper_col = st.columns([1, 4])
     with deselect_paper_col:
         if st.button("Deselect All", key="deselect_all_papers"):
-            for j in journals:
-                st.session_state.paper_journals_selected[j] = False
+            for i in range(len(journals)):
+                st.session_state[f"paper_journal_{i}"] = False
             st.rerun()
 
     # Journal checkboxes for papers
@@ -564,10 +566,8 @@ def main():
         with paper_journal_cols[i]:
             checked = st.checkbox(
                 short_name,
-                value=st.session_state.paper_journals_selected.get(journal, True),
                 key=f"paper_journal_{i}"
             )
-            st.session_state.paper_journals_selected[journal] = checked
             if checked:
                 paper_selected_journals.append(journal)
 
