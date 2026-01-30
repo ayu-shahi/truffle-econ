@@ -462,10 +462,17 @@ def main():
     # === FILTERS FOR GRAPH ===
     st.markdown('<p class="filter-label">Filter journals:</p>', unsafe_allow_html=True)
 
-    # Select/Deselect All for graph
-    select_all_col, spacer_col = st.columns([1, 4])
-    with select_all_col:
-        select_all_graph = st.checkbox("Select All", value=True, key="select_all_graph")
+    # Initialize session state for graph journal selections
+    if "graph_journals_selected" not in st.session_state:
+        st.session_state.graph_journals_selected = {j: True for j in journals}
+
+    # Deselect All button for graph
+    deselect_col, spacer_col = st.columns([1, 4])
+    with deselect_col:
+        if st.button("Deselect All", key="deselect_all_graph"):
+            for j in journals:
+                st.session_state.graph_journals_selected[j] = False
+            st.rerun()
 
     # Journal checkboxes in a row
     journal_cols = st.columns(5)
@@ -474,8 +481,12 @@ def main():
     for i, journal in enumerate(journals):
         short_name = JOURNAL_SHORT_NAMES.get(journal, journal[:3])
         with journal_cols[i]:
-            # Use select_all state to determine default
-            checked = st.checkbox(short_name, value=select_all_graph, key=f"graph_journal_{i}")
+            checked = st.checkbox(
+                short_name,
+                value=st.session_state.graph_journals_selected.get(journal, True),
+                key=f"graph_journal_{i}"
+            )
+            st.session_state.graph_journals_selected[journal] = checked
             if checked:
                 selected_journals.append(journal)
 
@@ -518,7 +529,7 @@ def main():
     # Display chart with disabled interactivity except hover
     st.plotly_chart(
         fig,
-        use_container_width=True,
+        width="stretch",
         config={
             'displayModeBar': False,
             'scrollZoom': False,
@@ -532,10 +543,17 @@ def main():
     # Filters for papers section
     st.markdown('<p class="filter-label">Filter papers:</p>', unsafe_allow_html=True)
 
-    # Select/Deselect All for papers
-    select_all_paper_col, spacer_paper_col = st.columns([1, 4])
-    with select_all_paper_col:
-        select_all_papers = st.checkbox("Select All", value=True, key="select_all_papers")
+    # Initialize session state for paper journal selections
+    if "paper_journals_selected" not in st.session_state:
+        st.session_state.paper_journals_selected = {j: True for j in journals}
+
+    # Deselect All button for papers
+    deselect_paper_col, spacer_paper_col = st.columns([1, 4])
+    with deselect_paper_col:
+        if st.button("Deselect All", key="deselect_all_papers"):
+            for j in journals:
+                st.session_state.paper_journals_selected[j] = False
+            st.rerun()
 
     # Journal checkboxes for papers
     paper_journal_cols = st.columns(5)
@@ -544,7 +562,12 @@ def main():
     for i, journal in enumerate(journals):
         short_name = JOURNAL_SHORT_NAMES.get(journal, journal[:3])
         with paper_journal_cols[i]:
-            checked = st.checkbox(short_name, value=select_all_papers, key=f"paper_journal_{i}")
+            checked = st.checkbox(
+                short_name,
+                value=st.session_state.paper_journals_selected.get(journal, True),
+                key=f"paper_journal_{i}"
+            )
+            st.session_state.paper_journals_selected[journal] = checked
             if checked:
                 paper_selected_journals.append(journal)
 
